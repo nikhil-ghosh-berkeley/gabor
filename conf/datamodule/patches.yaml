@@ -1,0 +1,9 @@
+_target_: src.datamodules.PatchesDataModule
+
+data_dir: ${work_dir}/data/patches/
+patch_width: 12
+patch_height: 12
+use_rawimage: False
+batch_size: 250
+n_train: 500000
+n_val: 10000

@@ -1,0 +1,23 @@
+_target_: src.autoencoder.Autoencoder
+
+width: 200
+
+activation:
+  _target_: torch.nn.Sigmoid
+  
+img_dims: [1, '${datamodule.patch_width}', '${datamodule.patch_height}']
+
+optimizer_partial:
+  _target_: functools.partial
+  _args_: ['${get_method:torch.optim.Adam}']
+  lr: 0.01
+
+lr_scheduler_partial:
+  _target_: functools.partial
+  _args_: ['${get_method:torch.optim.lr_scheduler.StepLR}']
+  step_size: ${int_mult:${decay_time}, ${trainer.max_epochs}}
+  gamma: 0.1
+
+corruption:
+  _target_: src.corruptions.GaussianNoise
+  sigma: 0.5
