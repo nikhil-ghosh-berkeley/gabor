@@ -1,0 +1,27 @@
+_target_: src.autoencoder.Autoencoder
+seed: ${seed}
+width: 200
+
+activation:
+  _target_: src.model_utils.Activation
+  name: Sigmoid
+  
+img_dims: [1, '${datamodule.patch_width}', '${datamodule.patch_height}']
+
+optimizer:
+  _target_: src.model_utils.Optimizer
+  name: Adam
+  lr: 0.01
+
+lr_scheduler: null
+
+initializer:
+  _target_: src.autoencoder.PerturbedInitializer
+  delta: 0.5
+  path: ${callbacks.distance.save_dir}/${callbacks.distance.fname}${callbacks.distance.ext}
+
+tied_weights: True
+
+corruption:
+  _target_: src.corruptions.GaussianNoise
+  sigma: 0.5

@@ -1,22 +1,42 @@
 _target_: src.autoencoder.Autoencoder
-
+seed: ${seed}
 width: 200
 
 activation:
-  _target_: torch.nn.Sigmoid
+  _target_: src.model_utils.Activation
+  name: Sigmoid
   
 img_dims: [1, '${datamodule.patch_width}', '${datamodule.patch_height}']
 
-optimizer_partial:
-  _target_: functools.partial
-  _args_: ['${get_method:torch.optim.Adam}']
+optimizer:
+  _target_: src.model_utils.Optimizer
+  name: Adam
   lr: 0.01
 
-lr_scheduler_partial:
-  _target_: functools.partial
-  _args_: ['${get_method:torch.optim.lr_scheduler.StepLR}']
-  step_size: ${int_mult:${decay_time}, ${trainer.max_epochs}}
-  gamma: 0.1
+# lr_scheduler:
+#   _target_: src.model_utils.LR_Scheduler
+#   name: StepLR
+#   decay_time: 0.6667
+#   step_size: ${int_mult:${model.lr_scheduler.decay_time}, ${trainer.max_epochs}}
+#   gamma: 0.1
+
+lr_scheduler: null
+
+# initializer:
+#   _target_: src.autoencoder.PerturbedInitializer
+#   delta: 0.5
+#   path: ${callbacks.distance.path}
+
+initializer:
+  _target_: src.autoencoder.RandomInitializer
+  init_scale: 1
+  init_pow: 1
+
+# initializer:
+#   _target_: src.autoencoder.SymmetricInitializer
+#   init_scale: 0.1
+
+tied_weights: True
 
 corruption:
   _target_: src.corruptions.GaussianNoise

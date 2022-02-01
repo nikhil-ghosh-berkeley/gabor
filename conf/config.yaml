@@ -4,7 +4,8 @@ defaults:
   - model: autoencoder.yaml
   - logger: wandb.yaml
   - hydra: default.yaml
+  - callbacks: default.yaml
   - _self_
 
 work_dir: ${hydra:runtime.cwd}
-decay_time: 0.6667
+seed: null

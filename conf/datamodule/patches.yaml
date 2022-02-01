@@ -1,4 +1,4 @@
-_target_: src.datamodules.PatchesDataModule
+_target_: src.patch_dm.PatchesDataModule
 
 data_dir: ${work_dir}/data/patches/
 patch_width: 12
