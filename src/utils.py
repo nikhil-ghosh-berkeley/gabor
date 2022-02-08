@@ -12,7 +12,7 @@ def log_hyperparams(config: DictConfig, trainer: Trainer) -> None:
 
     if "seed" in config:
         hparams["seed"] = config["seed"]
-    if "callbacks" in config:
-        hparams["callbacks"] = config["callbacks"]
+    # if "callbacks" in config:
+    #     hparams["callbacks"] = config["callbacks"]
 
     trainer.logger.log_hyperparams(hparams)

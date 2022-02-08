@@ -164,7 +164,6 @@ class GaborDataset(Dataset):
     ) -> None:
         w, h = patch_size
         dict_fname = f"gabor_{w}x{h}_m={m}_L={L}_inc={inc_bound}"
-
         dict_path = pjoin(save_dir, f"{dict_fname}.pt")
         if os.path.exists(dict_path):
             A = torch.load(dict_path)
@@ -173,10 +172,16 @@ class GaborDataset(Dataset):
             A = gabor_filterbank(
                 num_filters=m, patch_size=patch_size, L=L, inc_bound=inc_bound
             )
+            os.makedirs(save_dir, exist_ok=True)
             torch.save(A.t(), dict_path)
 
+        # A is size n x m
+        self.dictionary = A
         self.data_x = generate_from_dict(A, num_samples, k, noise)
         self.data_x = self.data_x.reshape(num_samples, 1, w, h)
+
+    def get_dictionary(self):
+        return self.dictionary
 
     def __getitem__(self, index):
         img = self.data_x[index]
@@ -207,9 +212,14 @@ class GaussianDataset(Dataset):
         else:
             A = torch.randn(n, m) / np.sqrt(n)
             A = A / torch.norm(A, dim=0)
+            os.makedirs(save_dir, exist_ok=True)
             torch.save(A.t(), dict_path)
 
+        self.dictionary = A
         self.data_x = generate_from_dict(A, num_samples, k, noise)
+
+    def get_dictionary(self):
+        return self.dictionary
 
     def __getitem__(self, index):
         img = self.data_x[index]

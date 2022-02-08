@@ -5,6 +5,9 @@ visualize_filters:
   nrow: 20
   padding: 2
 
+dict_incoherence:
+  _target_: src.callbacks.DictionaryIncoherence
+
 save_weights:
   _target_: src.callbacks.SaveWeights
   save_dirs:
@@ -12,8 +15,10 @@ save_weights:
     data_dir: patches_${datamodule.patch_width}x${datamodule.patch_height}_raw=${datamodule.use_rawimage}_ntrain=${datamodule.n_train}
     arch_dir: fc_width=${model.width}_act=${model.activation.name}_tied=${model.tied_weights}
     exp_dir: finetune_delta=${model.initializer.delta}
-  batch_size: ${datamodule.batch_size}
 
 distance:
   _target_: src.callbacks.DistanceToReference
-  path: ${datamodule.save_dir}/gaussian_${datamodule.patch_width}x${datamodule.patch_height}_m=${datamodule.m}.pt
+  save_dir: ${datamodule.save_dir}
+  fname: gaussian_${datamodule.patch_width}x${datamodule.patch_height}_m=${datamodule.m}.pt
+  param_key: W
+  reco_thresh: 0.7

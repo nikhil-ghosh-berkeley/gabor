@@ -5,17 +5,21 @@ visualize_filters:
   nrow: 20
   padding: 2
 
+dict_incoherence:
+  _target_: src.callbacks.DictionaryIncoherence
+
 save_weights:
   _target_: src.callbacks.SaveWeights
   save_dirs:
     top_dir: ${work_dir}/saved_weights
     data_dir: ${callbacks.distance.fname}_k=${datamodule.k}_noise=${datamodule.noise}
     arch_dir: fc_width=${model.width}_act=${model.activation.name}_tied=${model.tied_weights}
-    exp_dir: large
-  batch_size: ${datamodule.batch_size}
+    exp_dir: ''
 
 distance:
   _target_: src.callbacks.DistanceToReference
   save_dir: ${datamodule.save_dir}
-  fname: gabor_${datamodule.patch_width}x${datamodule.patch_height}_m=${datamodule.m}_L=${datamodule.L}_inc=${datamodule.inc_bound}
-  ext: .pt
+  fname: gabor_${datamodule.patch_width}x${datamodule.patch_height}_m=${datamodule.m}_L=${datamodule.L}_inc=${datamodule.inc_bound}.pt
+  param_key: W
+  reco_thresh: 0.7
+  

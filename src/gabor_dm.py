@@ -46,9 +46,14 @@ class GaborDataModule(pl.LightningDataModule):
             inc_bound=self.inc_bound
         )
 
+        self.dictionary = dataset.get_dictionary()
+
         self.train_set, self.val_set = random_split(
             dataset, [self.n_train, (len(dataset) - self.n_train)]
         )
+
+    def get_dictionary(self):
+        return self.dictionary
 
     def train_dataloader(self):
         return DataLoader(self.train_set, batch_size=self.batch_size, shuffle=True, num_workers=8, pin_memory=True)
