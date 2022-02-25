@@ -12,9 +12,9 @@ save_weights:
   _target_: src.callbacks.SaveWeights
   save_dirs:
     top_dir: ${work_dir}/saved_weights
-    data_dir: patches_${datamodule.patch_width}x${datamodule.patch_height}_raw=${datamodule.use_rawimage}_ntrain=${datamodule.n_train}
+    data_dir: ${callbacks.distance.fname}_k=${datamodule.k}_noise=${datamodule.noise}
     arch_dir: fc_width=${model.width}_act=${model.activation.name}_tied=${model.tied_weights}
-    exp_dir: finetune_delta=${model.initializer.delta}
+    exp_dir: ''
 
 distance:
   _target_: src.callbacks.DistanceToReference

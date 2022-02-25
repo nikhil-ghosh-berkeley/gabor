@@ -146,6 +146,7 @@ class Autoencoder(pl.LightningModule):
     def _shared_eval(self, batch, batch_idx):
         x = batch
         x_corr = x if self.corruption is None else self.corruption(x)
+        # import pdb; pdb.set_trace()
         x_rec = self(x_corr)
         loss = F.mse_loss(x, x_rec)
         return loss

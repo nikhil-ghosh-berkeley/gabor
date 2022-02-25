@@ -217,6 +217,7 @@ class GaussianDataset(Dataset):
 
         self.dictionary = A
         self.data_x = generate_from_dict(A, num_samples, k, noise)
+        self.data_x = self.data_x.reshape(num_samples, 1, w, h)
 
     def get_dictionary(self):
         return self.dictionary
