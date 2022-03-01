@@ -16,6 +16,9 @@ save_weights:
     arch_dir: fc_width=${model.width}_act=${model.activation.name}_tied=${model.tied_weights}
     exp_dir: ''
 
+weight_norm:
+  _target_: src.callbacks.WeightNorm
+
 distance:
   _target_: src.callbacks.DistanceToReference
   save_dir: ${datamodule.save_dir}

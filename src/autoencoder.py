@@ -93,6 +93,7 @@ class Autoencoder(pl.LightningModule):
         img_dims: List[int],
         optimizer: Optimizer,
         initializer: Callable,
+        threshold: float = 0.001,
         lr_scheduler: Optional[LR_Scheduler] = None,
         tied_weights: bool = False,
         corruption: Optional[Callable] = None,
@@ -103,6 +104,7 @@ class Autoencoder(pl.LightningModule):
         self.activation = activation
         self.img_dims = img_dims
         self.optimizer = optimizer
+        self.threshold = threshold
         self.lr_scheduler = lr_scheduler
         self.tied_weights = tied_weights
         self.corruption = corruption
@@ -113,9 +115,7 @@ class Autoencoder(pl.LightningModule):
 
     def forward(self, x):
         batch_size = x.size(0)
-        x = x.view([batch_size, -1])
-        x = F.linear(x, self.params["W"], self.params["b_enc"])
-        x = self.activation(x)
+        x = self.encoder(x)
 
         if self.tied_weights:
             x = F.linear(x, self.params["W"].t(), self.params["b_dec"])
@@ -123,6 +123,13 @@ class Autoencoder(pl.LightningModule):
             x = F.linear(x, self.params["W_dec"], self.params["b_dec"])
 
         x = x.view([batch_size] + self.img_dims)
+        return x
+
+    def encoder(self, x):
+        batch_size = x.size(0)
+        x = x.view([batch_size, -1])
+        x = F.linear(x, self.params["W"], self.params["b_enc"])
+        x = self.activation(x)
         return x
 
     def configure_optimizers(self):
@@ -143,10 +150,15 @@ class Autoencoder(pl.LightningModule):
         loss = self._shared_eval(batch, batch_idx)
         self.log("val_mse", loss)
 
+        with torch.no_grad():
+            encoded = self.encoder(batch)
+            encoded[torch.abs(encoded) < self.threshold] = 0
+            sparsity = torch.sum(torch.eq(encoded, torch.zeros_like(encoded))) / torch.numel(encoded)
+            self.log("activation_sparsity", sparsity)
+
     def _shared_eval(self, batch, batch_idx):
         x = batch
         x_corr = x if self.corruption is None else self.corruption(x)
-        # import pdb; pdb.set_trace()
         x_rec = self(x_corr)
         loss = F.mse_loss(x, x_rec)
         return loss

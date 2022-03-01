@@ -44,11 +44,19 @@ class VisualizeFilters(Callback):
             f"epoch {pl_module.current_epoch}", images=[wandb.Image(img)]
         )
 
+class WeightNorm(Callback):
+    def __init__(self):
+        super().__init__()
 
+    def on_train_epoch_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
+        W = pl_module.params["W"].detach()
+        trainer.logger.log_metrics({"weight_norm": torch.norm(W)})
+     
 class DistanceToReference(Callback):
     def __init__(
         self, save_dir: str, fname: str, param_key: str = "W", reco_thresh: float = 0.8
     ):
+        super().__init__()
         self.path = pjoin(save_dir, fname)
         self.param_key = param_key
         self.reco_thresh = reco_thresh
