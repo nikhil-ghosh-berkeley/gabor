@@ -1,0 +1,13 @@
+_target_: src.ortho_dm.OrthoDataModule
+
+save_dir: ${work_dir}/dictionaries/
+patch_width: 12
+patch_height: 12
+batch_size: 32
+n_train: 500000
+n_val: 10000
+m: 100
+k: 10
+noise: 0.0
+gamma: 1
+rho: 1

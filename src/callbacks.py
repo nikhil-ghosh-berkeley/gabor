@@ -30,7 +30,7 @@ class VisualizeFilters(Callback):
         self.nrow = nrow
         self.padding = padding
 
-    def on_train_epoch_start(
+    def on_validation_epoch_end(
         self, trainer: Trainer, pl_module: LightningModule
     ) -> None:
         tensor = pl_module.params["W"].detach().cpu().clone()
@@ -48,10 +48,10 @@ class WeightNorm(Callback):
     def __init__(self):
         super().__init__()
 
-    def on_train_epoch_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
+    def on_validation_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
         W = pl_module.params["W"].detach()
         trainer.logger.log_metrics({"weight_norm": torch.norm(W)})
-     
+
 class DistanceToReference(Callback):
     def __init__(
         self, save_dir: str, fname: str, param_key: str = "W", reco_thresh: float = 0.8
@@ -62,7 +62,7 @@ class DistanceToReference(Callback):
         self.reco_thresh = reco_thresh
         self.saved = None
 
-    def on_train_epoch_start(
+    def on_validation_epoch_end(
         self, trainer: Trainer, pl_module: LightningModule
     ) -> None:
         # load saved parameters
@@ -96,7 +96,7 @@ class DistanceToReference(Callback):
 
 
 class SaveWeights(Callback):
-    def __init__(self, save_dirs: Dict[str, str]) -> None:
+    def __init__(self, save_dirs: Dict[str, str], save_last_epoch_only=True) -> None:
         super().__init__()
         self.save_dir = pjoin(
             save_dirs["top_dir"],
@@ -104,18 +104,23 @@ class SaveWeights(Callback):
             save_dirs["arch_dir"],
             save_dirs["exp_dir"],
         )
+        self.save_last_epoch_only = save_last_epoch_only
 
-    def on_train_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
+    def on_validation_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
         fname = (
             f"fc_{pl_module.optimizer.name.lower()}"
             f"_lr={pl_module.optimizer.lr}"
             f"_bs={trainer.datamodule.batch_size}"
             f"_sigma={pl_module.corruption.sigma}"
             f"_epoch={pl_module.current_epoch}"
+            f"_step={trainer.global_step}"
             f"_seed={pl_module.seed}.pt"
         )
 
-        if pl_module.current_epoch == (trainer.max_epochs - 1):
+        is_last_epoch = pl_module.current_epoch == (trainer.max_epochs - 1)
+        save = (not self.save_last_epoch_only) or (self.save_last_epoch_only and is_last_epoch)
+
+        if save:
             pdict = pl_module.params
             os.makedirs(self.save_dir, exist_ok=True)
             torch.save(

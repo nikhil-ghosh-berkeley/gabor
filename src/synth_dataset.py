@@ -4,6 +4,7 @@ from itertools import product
 from os.path import join as pjoin
 from random import sample
 from typing import Tuple
+from scipy.stats import ortho_group
 
 import numpy as np
 import torch
@@ -138,11 +139,12 @@ def gabor_filterbank(
     return A
 
 
-def generate_from_dict(A: torch.Tensor, n_samples: int, k: int, noise: float):
+def generate_from_dict(A: torch.Tensor, n_samples: int, k: int, noise: float, gamma: float = 1.0, rho: float = 1.0):
     n, m = A.shape
 
     # train data
-    Z = abs(torch.randn(m, n_samples))
+    # Z = abs(torch.randn(m, n_samples))
+    Z = torch.rand(m, n_samples) * (rho - gamma) + gamma
     mask = 1.0 * (torch.randn(m, n_samples).argsort(axis=0) < k)
     Z *= mask
     X = torch.matmul(A, Z) + noise * torch.randn(n, n_samples) / np.sqrt(n)
@@ -217,6 +219,48 @@ class GaussianDataset(Dataset):
 
         self.dictionary = A
         self.data_x = generate_from_dict(A, num_samples, k, noise)
+        self.data_x = self.data_x.reshape(num_samples, 1, w, h)
+
+    def get_dictionary(self):
+        return self.dictionary
+
+    def __getitem__(self, index):
+        img = self.data_x[index]
+        return img
+
+    def __len__(self):
+        return self.data_x.shape[0]
+
+class OrthoDataset(Dataset):
+    def __init__(
+        self,
+        save_dir: str,
+        patch_size: Tuple[int, int],
+        num_samples: int,
+        m: int,
+        k: int,
+        noise: float,
+        gamma: float,
+        rho: float
+    ) -> None:
+        w, h = patch_size
+        n = w * h
+        assert(m <= n)
+        dict_fname = f"ortho_{w}x{h}_m={m}"
+
+        dict_path = pjoin(save_dir, f"{dict_fname}.pt")
+        if os.path.exists(dict_path):
+            A = torch.load(dict_path)
+            A = A.t()
+        else:
+            A = ortho_group.rvs(dim=n)
+            A = A[:, :m]
+            A = torch.from_numpy(A).float()
+            os.makedirs(save_dir, exist_ok=True)
+            torch.save(A.t(), dict_path)
+
+        self.dictionary = A
+        self.data_x = generate_from_dict(A, num_samples, k, noise, gamma, rho)
         self.data_x = self.data_x.reshape(num_samples, 1, w, h)
 
     def get_dictionary(self):

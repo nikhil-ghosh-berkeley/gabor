@@ -1,6 +1,7 @@
 _target_: src.autoencoder.Autoencoder
 seed: ${seed}
 width: 200
+weight_norm: False
 
 activation:
   _target_: src.model_utils.Activation
@@ -31,6 +32,8 @@ initializer:
   _target_: src.autoencoder.RandomInitializer
   init_scale: 1
   init_pow: 1
+  b_enc: False
+  b_dec: False
 
 # initializer:
 #   _target_: src.autoencoder.SymmetricInitializer

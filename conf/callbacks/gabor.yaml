@@ -10,6 +10,7 @@ dict_incoherence:
 
 save_weights:
   _target_: src.callbacks.SaveWeights
+  save_last_epoch_only: True
   save_dirs:
     top_dir: ${work_dir}/saved_weights
     data_dir: ${callbacks.distance.fname}_k=${datamodule.k}_noise=${datamodule.noise}

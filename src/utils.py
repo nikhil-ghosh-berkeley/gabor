@@ -1,3 +1,4 @@
+from typing import Dict
 from omegaconf import DictConfig
 from pytorch_lightning import Trainer
 
@@ -16,3 +17,9 @@ def log_hyperparams(config: DictConfig, trainer: Trainer) -> None:
     #     hparams["callbacks"] = config["callbacks"]
 
     trainer.logger.log_hyperparams(hparams)
+
+def dict_get(d: Dict, key: str):
+    if key in d:
+        return d[key]
+    else:
+        return None

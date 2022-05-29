@@ -7,6 +7,7 @@ import torch.nn as nn
 from torch.nn.parameter import Parameter
 from torch.nn import functional as F
 from src.model_utils import Optimizer, LR_Scheduler
+from src.utils import dict_get
 
 import warnings
 
@@ -63,9 +64,11 @@ class SymmetricInitializer:
 
 
 class RandomInitializer:
-    def __init__(self, init_scale: float = 1.0, init_pow: int = 1):
+    def __init__(self, init_scale: float = 1.0, init_pow: int = 1, b_enc: bool = True, b_dec: bool = True):
         self.init_scale = init_scale
         self.init_pow = init_pow
+        self.b_enc = b_enc
+        self.b_dec = b_dec
 
     def __call__(self, in_features, out_features, tied_weights) -> nn.ParameterDict:
         params = dict()
@@ -76,8 +79,12 @@ class RandomInitializer:
             return 2 * k * torch.rand(size) - k
 
         params["W"] = Parameter(rescaled_unif(out_features, in_features))
-        params["b_enc"] = Parameter(rescaled_unif(out_features))
-        params["b_dec"] = Parameter(rescaled_unif(in_features))
+
+        if self.b_enc:
+            params["b_enc"] = Parameter(rescaled_unif(out_features))
+
+        if self.b_dec:
+            params["b_dec"] = Parameter(rescaled_unif(in_features))
 
         if tied_weights is False:
             params["W_dec"] = Parameter(rescaled_unif(in_features, out_features))
@@ -98,6 +105,7 @@ class Autoencoder(pl.LightningModule):
         tied_weights: bool = False,
         corruption: Optional[Callable] = None,
         seed: Optional[int] = None,
+        weight_norm: bool = False
     ):
         super().__init__()
         self.width = width
@@ -109,26 +117,32 @@ class Autoencoder(pl.LightningModule):
         self.tied_weights = tied_weights
         self.corruption = corruption
         self.seed = seed
+        self.weight_norm = weight_norm
 
         img_size = np.prod(img_dims)
         self.params = initializer(img_size, width, tied_weights)
 
     def forward(self, x):
+        if self.weight_norm:
+            with torch.no_grad():
+                self.params["W"] = Parameter(F.normalize(self.params["W"], dim=1))
+        
         batch_size = x.size(0)
         x = self.encoder(x)
 
         if self.tied_weights:
-            x = F.linear(x, self.params["W"].t(), self.params["b_dec"])
+            x = F.linear(x, self.params["W"].t(), dict_get(self.params, "b_dec"))
         else:
-            x = F.linear(x, self.params["W_dec"], self.params["b_dec"])
+            x = F.linear(x, self.params["W_dec"], dict_get(self.params, "b_dec"))
 
         x = x.view([batch_size] + self.img_dims)
+
         return x
 
     def encoder(self, x):
         batch_size = x.size(0)
         x = x.view([batch_size, -1])
-        x = F.linear(x, self.params["W"], self.params["b_enc"])
+        x = F.linear(x, self.params["W"], dict_get(self.params, "b_enc"))
         x = self.activation(x)
         return x
 
@@ -150,11 +164,11 @@ class Autoencoder(pl.LightningModule):
         loss = self._shared_eval(batch, batch_idx)
         self.log("val_mse", loss)
 
-        with torch.no_grad():
-            encoded = self.encoder(batch)
-            encoded[torch.abs(encoded) < self.threshold] = 0
-            sparsity = torch.sum(torch.eq(encoded, torch.zeros_like(encoded))) / torch.numel(encoded)
-            self.log("activation_sparsity", sparsity)
+        # with torch.no_grad():
+        #     encoded = self.encoder(batch)
+        #     encoded[torch.abs(encoded) < self.threshold] = 0
+        #     sparsity = torch.sum(torch.eq(encoded, torch.zeros_like(encoded))) / torch.numel(encoded)
+        #     self.log("activation_sparsity", sparsity)
 
     def _shared_eval(self, batch, batch_idx):
         x = batch

@@ -2,3 +2,5 @@ _target_: pytorch_lightning.Trainer
 
 gpus: 1
 max_epochs: 50
+val_check_interval: 1.0
+# track_grad_norm: 2
