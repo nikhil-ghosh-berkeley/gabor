@@ -166,7 +166,7 @@ class GaborDataset(Dataset):
     ) -> None:
         w, h = patch_size
         dict_fname = f"gabor_{w}x{h}_m={m}_L={L}_inc={inc_bound}"
-        dict_path = pjoin(save_dir, f"{dict_fname}.pt")
+        dict_path = pjoin(save_dir, f"{dict_fname}")
         if os.path.exists(dict_path):
             A = torch.load(dict_path)
             A = A.t()
@@ -202,12 +202,13 @@ class GaussianDataset(Dataset):
         m: int,
         k: int,
         noise: float,
+        seed: int
     ) -> None:
         w, h = patch_size
         n = w * h
-        dict_fname = f"gaussian_{w}x{h}_m={m}"
+        dict_fname = f"gaussian_{w}x{h}_m={m}_seed={seed}"
 
-        dict_path = pjoin(save_dir, f"{dict_fname}.pt")
+        dict_path = pjoin(save_dir, f"{dict_fname}")
         if os.path.exists(dict_path):
             A = torch.load(dict_path)
             A = A.t()
@@ -239,6 +240,7 @@ class OrthoDataset(Dataset):
         num_samples: int,
         m: int,
         k: int,
+        seed: int,
         noise: float,
         gamma: float,
         rho: float
@@ -246,9 +248,9 @@ class OrthoDataset(Dataset):
         w, h = patch_size
         n = w * h
         assert(m <= n)
-        dict_fname = f"ortho_{w}x{h}_m={m}"
+        dict_fname = f"ortho_{w}x{h}_m={m}_seed={seed}"
 
-        dict_path = pjoin(save_dir, f"{dict_fname}.pt")
+        dict_path = pjoin(save_dir, f"{dict_fname}")
         if os.path.exists(dict_path):
             A = torch.load(dict_path)
             A = A.t()

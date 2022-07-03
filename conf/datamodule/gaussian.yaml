@@ -9,3 +9,4 @@ n_val: 10000
 m: 100
 k: 10
 noise: 0.0
+seed: ${seed}

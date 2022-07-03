@@ -11,3 +11,4 @@ k: 10
 noise: 0.0
 gamma: 1
 rho: 1
+seed: ${seed}

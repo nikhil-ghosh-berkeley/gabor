@@ -18,6 +18,7 @@ class GaussianDataModule(pl.LightningDataModule):
         n_train: int,
         n_val: int,
         batch_size: int,
+        seed: int
     ):
         super().__init__()
         self.save_dir = save_dir
@@ -29,6 +30,7 @@ class GaussianDataModule(pl.LightningDataModule):
         self.noise = noise
         self.n_train = n_train
         self.n_val = n_val
+        self.seed = seed
 
     def setup(self, stage: Optional[str] = None):
         dataset = GaussianDataset(
@@ -38,6 +40,7 @@ class GaussianDataModule(pl.LightningDataModule):
             m=self.m,
             k=self.k,
             noise=self.noise,
+            seed=self.seed
         )
 
         self.dictionary = dataset.get_dictionary()

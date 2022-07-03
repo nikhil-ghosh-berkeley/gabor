@@ -14,6 +14,7 @@ class OrthoDataModule(pl.LightningDataModule):
         patch_height: int,
         m: int,
         k: int,
+        seed: int,
         noise: float,
         n_train: int,
         n_val: int,
@@ -28,6 +29,7 @@ class OrthoDataModule(pl.LightningDataModule):
         self.batch_size = batch_size
         self.m = m
         self.k = k
+        self.seed = seed
         self.noise = noise
         self.n_train = n_train
         self.n_val = n_val
@@ -41,6 +43,7 @@ class OrthoDataModule(pl.LightningDataModule):
             (self.n_train + self.n_val),
             m=self.m,
             k=self.k,
+            seed=self.seed,
             noise=self.noise,
             gamma=self.gamma,
             rho=self.rho

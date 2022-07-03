@@ -44,27 +44,36 @@ class VisualizeFilters(Callback):
             f"epoch {pl_module.current_epoch}", images=[wandb.Image(img)]
         )
 
+
 class WeightNorm(Callback):
     def __init__(self):
         super().__init__()
 
-    def on_validation_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
+    def save_weight_norm(self, trainer: Trainer, pl_module: LightningModule):
         W = pl_module.params["W"].detach()
         trainer.logger.log_metrics({"weight_norm": torch.norm(W)})
 
+    def on_validation_epoch_end(
+        self, trainer: Trainer, pl_module: LightningModule
+    ) -> None:
+        self.save_weight_norm(trainer, pl_module)
+
+    def on_train_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
+        self.save_weight_norm(trainer, pl_module)
+
+
 class DistanceToReference(Callback):
     def __init__(
-        self, save_dir: str, fname: str, param_key: str = "W", reco_thresh: float = 0.8
+        self, save_dir: str, fname: str, param_key: str = "W", reco_thresh: float = 0.8, signed: bool = True,
     ):
         super().__init__()
         self.path = pjoin(save_dir, fname)
         self.param_key = param_key
         self.reco_thresh = reco_thresh
+        self.signed = signed
         self.saved = None
-
-    def on_validation_epoch_end(
-        self, trainer: Trainer, pl_module: LightningModule
-    ) -> None:
+    
+    def save_distance(self, trainer: Trainer, pl_module: LightningModule):
         # load saved parameters
         if self.saved is None:
             self.saved = torch.load(self.path, map_location=pl_module.device)
@@ -79,8 +88,12 @@ class DistanceToReference(Callback):
         # W0 is m x n, W is p x n
         all_pairs = cos_sim(W0, W).cpu().numpy()
         # all_pairs is m x p with all_pairs[i,j] = cossim(W0[i,:], W[j,:])
-        dict_reco = np.max(np.abs(all_pairs), axis=1)
-        max_sim = np.max(np.abs(all_pairs), axis=0)
+        if self.signed:
+            dict_reco = np.max(all_pairs, axis=1)
+            max_sim = np.max(all_pairs, axis=0)
+        else:
+            dict_reco = np.max(np.abs(all_pairs), axis=1)
+            max_sim = np.max(np.abs(all_pairs), axis=0)
         trainer.logger.log_metrics(
             {
                 "min_max_sim": np.min(max_sim),
@@ -94,9 +107,15 @@ class DistanceToReference(Callback):
             }
         )
 
+    def on_validation_epoch_end(self, trainer: Trainer, pl_module: LightningModule):
+        self.save_distance(trainer, pl_module)
+
+    def on_train_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
+        self.save_distance(trainer, pl_module)
+
 
 class SaveWeights(Callback):
-    def __init__(self, save_dirs: Dict[str, str], save_last_epoch_only=True) -> None:
+    def __init__(self, save_dirs: Dict[str, str], save_last_epoch_only=False) -> None:
         super().__init__()
         self.save_dir = pjoin(
             save_dirs["top_dir"],
@@ -106,7 +125,7 @@ class SaveWeights(Callback):
         )
         self.save_last_epoch_only = save_last_epoch_only
 
-    def on_validation_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
+    def save_weights(self, trainer: Trainer, pl_module: LightningModule):
         fname = (
             f"fc_{pl_module.optimizer.name.lower()}"
             f"_lr={pl_module.optimizer.lr}"
@@ -114,11 +133,12 @@ class SaveWeights(Callback):
             f"_sigma={pl_module.corruption.sigma}"
             f"_epoch={pl_module.current_epoch}"
             f"_step={trainer.global_step}"
-            f"_seed={pl_module.seed}.pt"
         )
 
         is_last_epoch = pl_module.current_epoch == (trainer.max_epochs - 1)
-        save = (not self.save_last_epoch_only) or (self.save_last_epoch_only and is_last_epoch)
+        save = (not self.save_last_epoch_only) or (
+            self.save_last_epoch_only and is_last_epoch
+        )
 
         if save:
             pdict = pl_module.params
@@ -126,3 +146,11 @@ class SaveWeights(Callback):
             torch.save(
                 {p: pdict[p].detach() for p in pdict}, pjoin(self.save_dir, fname)
             )
+
+    def on_train_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
+        self.save_weights(trainer, pl_module)
+
+    def on_validation_epoch_end(self, trainer: Trainer, pl_module: LightningModule):
+        self.save_weights(trainer, pl_module)
+
+        
