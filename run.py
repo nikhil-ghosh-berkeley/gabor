@@ -2,7 +2,7 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 
 from src.train import train
-from pytorch_lightning.utilities.seed import seed_everything
+from lightning_lite.utilities.seed import seed_everything
 
 OmegaConf.register_new_resolver("get_method", hydra.utils.get_method)
 OmegaConf.register_new_resolver("int_mult", lambda x, y: int(x * y))
