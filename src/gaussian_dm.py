@@ -18,7 +18,7 @@ class GaussianDataModule(pl.LightningDataModule):
         n_train: int,
         n_val: int,
         batch_size: int,
-        seed: int
+        seed: int,
     ):
         super().__init__()
         self.save_dir = save_dir
@@ -40,7 +40,7 @@ class GaussianDataModule(pl.LightningDataModule):
             m=self.m,
             k=self.k,
             noise=self.noise,
-            seed=self.seed
+            seed=self.seed,
         )
 
         self.dictionary = dataset.get_dictionary()
@@ -53,7 +53,15 @@ class GaussianDataModule(pl.LightningDataModule):
         return self.dictionary
 
     def train_dataloader(self):
-        return DataLoader(self.train_set, batch_size=self.batch_size, shuffle=True, num_workers=8, pin_memory=True)
+        return DataLoader(
+            self.train_set,
+            batch_size=self.batch_size,
+            shuffle=True,
+            num_workers=8,
+            pin_memory=True,
+        )
 
     def val_dataloader(self):
-        return DataLoader(self.val_set, batch_size=256, shuffle=False, num_workers=8, pin_memory=True)
+        return DataLoader(
+            self.val_set, batch_size=256, shuffle=False, num_workers=8, pin_memory=True
+        )

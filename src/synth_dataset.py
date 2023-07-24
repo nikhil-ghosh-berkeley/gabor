@@ -4,7 +4,7 @@ from itertools import product
 from os.path import join as pjoin
 from random import sample
 from typing import Tuple
-from scipy.stats import ortho_group
+# from scipy.stats import ortho_group
 
 import numpy as np
 import torch
@@ -50,8 +50,8 @@ def gabor_2d(M, N, lamb, theta, sigma, gamma=1.0, offset_x=0, offset_y=0):
 
     gab = np.zeros((M, N), np.complex128)
     xx, yy = np.mgrid[
-        offset_x - (M // 2):offset_x + M - (M // 2),
-        offset_y - (N // 2):offset_y + N - (N // 2),
+        offset_x - (M // 2): offset_x + M - (M // 2),
+        offset_y - (N // 2): offset_y + N - (N // 2),
     ]
 
     arg = -(
@@ -139,7 +139,14 @@ def gabor_filterbank(
     return A
 
 
-def generate_from_dict(A: torch.Tensor, n_samples: int, k: int, noise: float, gamma: float = 1.0, rho: float = 1.0):
+def generate_from_dict(
+    A: torch.Tensor,
+    n_samples: int,
+    k: int,
+    noise: float,
+    gamma: float = 1.0,
+    rho: float = 1.0,
+):
     n, m = A.shape
 
     # train data
@@ -202,7 +209,7 @@ class GaussianDataset(Dataset):
         m: int,
         k: int,
         noise: float,
-        seed: int
+        seed: int,
     ) -> None:
         w, h = patch_size
         n = w * h
@@ -232,6 +239,7 @@ class GaussianDataset(Dataset):
     def __len__(self):
         return self.data_x.shape[0]
 
+
 class OrthoDataset(Dataset):
     def __init__(
         self,
@@ -243,23 +251,25 @@ class OrthoDataset(Dataset):
         seed: int,
         noise: float,
         gamma: float,
-        rho: float
+        rho: float,
     ) -> None:
         w, h = patch_size
         n = w * h
-        assert(m <= n)
+        assert m <= n
         dict_fname = f"ortho_{w}x{h}_m={m}_seed={seed}"
 
         dict_path = pjoin(save_dir, f"{dict_fname}")
-        if os.path.exists(dict_path):
-            A = torch.load(dict_path)
-            A = A.t()
-        else:
-            A = ortho_group.rvs(dim=n)
-            A = A[:, :m]
-            A = torch.from_numpy(A).float()
-            os.makedirs(save_dir, exist_ok=True)
-            torch.save(A.t(), dict_path)
+        # if os.path.exists(dict_path):
+        #     A = torch.load(dict_path)
+        #     A = A.t()
+        # else:
+        # A = ortho_group.rvs(dim=n)
+        A = np.eye(n)
+        # A = np.diag(np.random.randn(n) * 2)
+        A = A[:, :m]
+        A = torch.from_numpy(A).float()
+        os.makedirs(save_dir, exist_ok=True)
+        torch.save(A.t(), dict_path)
 
         self.dictionary = A
         self.data_x = generate_from_dict(A, num_samples, k, noise, gamma, rho)

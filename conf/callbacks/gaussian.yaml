@@ -12,13 +12,17 @@ save_weights:
   _target_: src.callbacks.SaveWeights
   save_dirs:
     top_dir: ${work_dir}/saved_weights
-    data_dir: ${callbacks.distance.fname}_k=${datamodule.k}_noise=${datamodule.noise}
+    data_dir: ${callbacks.distance.fname}_k=${datamodule.k}_n=${datamodule.n_train}_noise=${datamodule.noise}
     arch_dir: fc_width=${model.width}_act=${model.activation.name}_tied=${model.tied_weights}
     exp_dir: ''
 
 distance:
   _target_: src.callbacks.DistanceToReference
   save_dir: ${datamodule.save_dir}
-  fname: gaussian_${datamodule.patch_width}x${datamodule.patch_height}_m=${datamodule.m}.pt
+  fname: gaussian_${datamodule.patch_width}x${datamodule.patch_height}_m=${datamodule.m}_seed=${seed}
   param_key: W
-  reco_thresh: 0.7
+  reco_thresh: 0.9
+  signed: True
+
+weight_norm:
+  _target_: src.callbacks.WeightNorm

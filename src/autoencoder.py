@@ -1,4 +1,4 @@
-from typing import Callable, List, Optional, Any
+from typing import Callable, List, Optional
 import math
 import numpy as np
 import pytorch_lightning as pl
@@ -15,6 +15,7 @@ warnings.filterwarnings(
     "ignore", message="Setting attributes on ParameterDict is not supported."
 )
 
+
 class PerturbedInitializer:
     def __init__(self, path: str, delta: float = 0.0):
         self.delta = delta
@@ -28,7 +29,7 @@ class PerturbedInitializer:
             # return x ~ Unif(-k, k)
             return 2 * k * torch.rand(size) - k
 
-        pdict = torch.load(self.path, map_location=torch.device('cpu'))
+        pdict = torch.load(self.path, map_location=torch.device("cpu"))
         # import pdb; pdb.set_trace()
         W0 = pdict["W"]
         n, m = W0.shape
@@ -64,7 +65,13 @@ class SymmetricInitializer:
 
 
 class RandomInitializer:
-    def __init__(self, init_scale: float = 1.0, init_pow: int = 1, b_enc: bool = True, b_dec: bool = True):
+    def __init__(
+        self,
+        init_scale: float = 1.0,
+        init_pow: int = 1,
+        b_enc: bool = True,
+        b_dec: bool = True,
+    ):
         self.init_scale = init_scale
         self.init_pow = init_pow
         self.b_enc = b_enc
@@ -105,7 +112,7 @@ class Autoencoder(pl.LightningModule):
         tied_weights: bool = False,
         corruption: Optional[Callable] = None,
         seed: Optional[int] = None,
-        weight_norm: bool = False
+        weight_norm: bool = False,
     ):
         super().__init__()
         self.width = width
@@ -126,7 +133,7 @@ class Autoencoder(pl.LightningModule):
         if self.weight_norm:
             with torch.no_grad():
                 self.params["W"] = Parameter(F.normalize(self.params["W"], dim=1))
-        
+
         batch_size = x.size(0)
         x = self.encoder(x)
 

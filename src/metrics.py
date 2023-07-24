@@ -5,22 +5,26 @@ import torch
 import torch.nn.functional as F
 from scipy.optimize import linear_sum_assignment
 
+
 def standardize(X):
     X = X - torch.min(X, dim=1, keepdim=True)[0]
     X = X / torch.max(X, dim=1, keepdim=True)[0]
     return X
 
+
 def cos_sim(A, B):
-    '''
+    """
     A: tensor of size m x n
     B: tensor of size p x n
-    '''
+    """
 
     return F.normalize(A) @ F.normalize(B).T
+
 
 def match_min_row_cost(all_pairs):
     row_ind, col_ind = linear_sum_assignment(all_pairs)
     return all_pairs[row_ind, col_ind].sum()
+
 
 def comp_incoherence(A):
     """

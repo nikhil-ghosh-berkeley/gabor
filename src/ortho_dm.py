@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Optional
 
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader, random_split
@@ -46,7 +46,7 @@ class OrthoDataModule(pl.LightningDataModule):
             seed=self.seed,
             noise=self.noise,
             gamma=self.gamma,
-            rho=self.rho
+            rho=self.rho,
         )
 
         self.dictionary = dataset.get_dictionary()
@@ -59,7 +59,15 @@ class OrthoDataModule(pl.LightningDataModule):
         return self.dictionary
 
     def train_dataloader(self):
-        return DataLoader(self.train_set, batch_size=self.batch_size, shuffle=True, num_workers=8, pin_memory=True)
+        return DataLoader(
+            self.train_set,
+            batch_size=self.batch_size,
+            shuffle=True,
+            num_workers=8,
+            pin_memory=True,
+        )
 
     def val_dataloader(self):
-        return DataLoader(self.val_set, batch_size=256, shuffle=False, num_workers=8, pin_memory=True)
+        return DataLoader(
+            self.val_set, batch_size=256, shuffle=False, num_workers=8, pin_memory=True
+        )

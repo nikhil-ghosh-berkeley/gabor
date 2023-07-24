@@ -39,7 +39,15 @@ class PatchesDataModule(pl.LightningDataModule):
         )
 
     def train_dataloader(self):
-        return DataLoader(self.train_set, batch_size=self.batch_size, shuffle=True, num_workers=8, pin_memory=True)
+        return DataLoader(
+            self.train_set,
+            batch_size=self.batch_size,
+            shuffle=True,
+            num_workers=8,
+            pin_memory=True,
+        )
 
     def val_dataloader(self):
-        return DataLoader(self.val_set, batch_size=256, shuffle=False, num_workers=8, pin_memory=True)
+        return DataLoader(
+            self.val_set, batch_size=256, shuffle=False, num_workers=8, pin_memory=True
+        )

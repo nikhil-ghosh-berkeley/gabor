@@ -18,6 +18,7 @@ def log_hyperparams(config: DictConfig, trainer: Trainer) -> None:
 
     trainer.logger.log_hyperparams(hparams)
 
+
 def dict_get(d: Dict, key: str):
     if key in d:
         return d[key]

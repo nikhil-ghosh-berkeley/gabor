@@ -7,7 +7,6 @@ import torch
 import wandb
 from pytorch_lightning import Callback, LightningModule, Trainer
 from torchvision.utils import make_grid
-import torch.nn.functional as F
 from src.metrics import cos_sim, comp_incoherence
 
 
@@ -64,7 +63,12 @@ class WeightNorm(Callback):
 
 class DistanceToReference(Callback):
     def __init__(
-        self, save_dir: str, fname: str, param_key: str = "W", reco_thresh: float = 0.8, signed: bool = True,
+        self,
+        save_dir: str,
+        fname: str,
+        param_key: str = "W",
+        reco_thresh: float = 0.8,
+        signed: bool = True,
     ):
         super().__init__()
         self.path = pjoin(save_dir, fname)
@@ -72,7 +76,7 @@ class DistanceToReference(Callback):
         self.reco_thresh = reco_thresh
         self.signed = signed
         self.saved = None
-    
+
     def save_distance(self, trainer: Trainer, pl_module: LightningModule):
         # load saved parameters
         if self.saved is None:
@@ -97,6 +101,7 @@ class DistanceToReference(Callback):
         trainer.logger.log_metrics(
             {
                 "min_max_sim": np.min(max_sim),
+                "avg_max_sim": np.mean(max_sim),
                 f"reco_frac_{self.reco_thresh}": np.mean(dict_reco >= self.reco_thresh),
             }
         )
@@ -152,5 +157,3 @@ class SaveWeights(Callback):
 
     def on_validation_epoch_end(self, trainer: Trainer, pl_module: LightningModule):
         self.save_weights(trainer, pl_module)
-
-        

@@ -3,7 +3,7 @@ python run.py \
 seed=1 \
 callbacks=gabor \
 datamodule=gabor \
-callbacks.save_weights.save_last_epoch_only=False \
+callbacks.save_weights.save_last_epoch_only=True \
 logger.project=test \
 datamodule.batch_size=32 \
 datamodule.m=40 \

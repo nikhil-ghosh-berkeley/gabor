@@ -7,6 +7,7 @@ import torch
 from sklearn.feature_extraction import image
 from torch.utils.data import Dataset
 
+
 def get_image_patches(
     data_dir: str, patch_size: Tuple[int, int], use_rawimage: bool, num_patches: int
 ):

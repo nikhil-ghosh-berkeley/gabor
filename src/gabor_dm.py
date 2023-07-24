@@ -19,7 +19,7 @@ class GaborDataModule(pl.LightningDataModule):
         n_val: int,
         batch_size: int,
         L: int,
-        inc_bound: float
+        inc_bound: float,
     ):
         super().__init__()
         self.save_dir = save_dir
@@ -43,7 +43,7 @@ class GaborDataModule(pl.LightningDataModule):
             k=self.k,
             noise=self.noise,
             L=self.L,
-            inc_bound=self.inc_bound
+            inc_bound=self.inc_bound,
         )
 
         self.dictionary = dataset.get_dictionary()
@@ -56,7 +56,15 @@ class GaborDataModule(pl.LightningDataModule):
         return self.dictionary
 
     def train_dataloader(self):
-        return DataLoader(self.train_set, batch_size=self.batch_size, shuffle=True, num_workers=8, pin_memory=True)
+        return DataLoader(
+            self.train_set,
+            batch_size=self.batch_size,
+            shuffle=True,
+            num_workers=8,
+            pin_memory=True,
+        )
 
     def val_dataloader(self):
-        return DataLoader(self.val_set, batch_size=256, shuffle=False, num_workers=8, pin_memory=True)
+        return DataLoader(
+            self.val_set, batch_size=256, shuffle=False, num_workers=8, pin_memory=True
+        )

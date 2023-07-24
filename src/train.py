@@ -28,10 +28,7 @@ def train(config: DictConfig):
     log.info(f"Instantiating trainer <{config.trainer._target_}>")
 
     trainer: Trainer = hydra.utils.instantiate(
-        config.trainer,
-        logger=logger,
-        callbacks=callbacks,
-        enable_checkpointing=False
+        config.trainer, logger=logger, callbacks=callbacks, enable_checkpointing=False
     )
 
     log.info(f"Instantiating model <{config.model._target_}>")
