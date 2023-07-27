@@ -19,6 +19,6 @@ save_weights:
 distance:
   _target_: src.callbacks.DistanceToReference
   save_dir: ${datamodule.save_dir}
-  fname: gaussian_${datamodule.patch_width}x${datamodule.patch_height}_m=${datamodule.m}.pt
+  fname: gaussian_${datamodule.patch_width}x${datamodule.patch_height}_m=${datamodule.m}_seed=${seed}
   param_key: W
   reco_thresh: 0.7

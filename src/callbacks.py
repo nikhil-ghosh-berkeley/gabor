@@ -98,6 +98,7 @@ class DistanceToReference(Callback):
             {
                 "min_max_sim": np.min(max_sim),
                 f"reco_frac_{self.reco_thresh}": np.mean(dict_reco >= self.reco_thresh),
+                f"mean_dict_reco": np.mean(dict_reco)
             }
         )
         trainer.logger.experiment.log(
