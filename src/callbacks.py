@@ -87,6 +87,7 @@ class DistanceToReference(Callback):
         W = pl_module.params["W"].detach()
         # W0 is m x n, W is p x n
         all_pairs = cos_sim(W0, W).cpu().numpy()
+        diff = W0 - W[np.argmax(all_pairs, axis=1),:]
         # all_pairs is m x p with all_pairs[i,j] = cossim(W0[i,:], W[j,:])
         if self.signed:
             dict_reco = np.max(all_pairs, axis=1)
@@ -98,7 +99,8 @@ class DistanceToReference(Callback):
             {
                 "min_max_sim": np.min(max_sim),
                 f"reco_frac_{self.reco_thresh}": np.mean(dict_reco >= self.reco_thresh),
-                f"mean_dict_reco": np.mean(dict_reco)
+                "mean_dict_reco": np.mean(dict_reco),
+                "l2 distance": np.linalg.norm(diff.cpu().numpy())**2/np.prod(diff.shape)
             }
         )
         trainer.logger.experiment.log(
