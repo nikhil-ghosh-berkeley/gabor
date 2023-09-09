@@ -115,7 +115,7 @@ class DistanceToReference(Callback):
 
 
 class SaveWeights(Callback):
-    def __init__(self, save_dirs: Dict[str, str], save_last_epoch_only=False) -> None:
+    def __init__(self, save_dirs: Dict[str, str], save_last_epoch_only=True) -> None:
         super().__init__()
         self.save_dir = pjoin(
             save_dirs["top_dir"],

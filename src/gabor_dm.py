@@ -19,7 +19,8 @@ class GaborDataModule(pl.LightningDataModule):
         n_val: int,
         batch_size: int,
         L: int,
-        inc_bound: float
+        inc_bound: float,
+        seed: int
     ):
         super().__init__()
         self.save_dir = save_dir
@@ -31,6 +32,7 @@ class GaborDataModule(pl.LightningDataModule):
         self.noise = noise
         self.L = L
         self.inc_bound = inc_bound
+        self.seed = seed
         self.n_train = n_train
         self.n_val = n_val
 
@@ -43,7 +45,8 @@ class GaborDataModule(pl.LightningDataModule):
             k=self.k,
             noise=self.noise,
             L=self.L,
-            inc_bound=self.inc_bound
+            inc_bound=self.inc_bound,
+            seed=self.seed
         )
 
         self.dictionary = dataset.get_dictionary()

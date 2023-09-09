@@ -163,9 +163,10 @@ class GaborDataset(Dataset):
         noise: float,
         L: int,
         inc_bound: float,
+        seed: int
     ) -> None:
         w, h = patch_size
-        dict_fname = f"gabor_{w}x{h}_m={m}_L={L}_inc={inc_bound}"
+        dict_fname = f"gabor_{w}x{h}_m={m}_L={L}_inc={inc_bound}_seed={seed}"
         dict_path = pjoin(save_dir, f"{dict_fname}")
         if os.path.exists(dict_path):
             A = torch.load(dict_path)

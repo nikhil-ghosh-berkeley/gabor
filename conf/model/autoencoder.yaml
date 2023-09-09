@@ -32,7 +32,7 @@ initializer:
   _target_: src.autoencoder.RandomInitializer
   init_scale: 1
   init_pow: 1
-  b_enc: False
+  b_enc: True
   b_dec: False
 
 # initializer:

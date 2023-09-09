@@ -23,7 +23,7 @@ weight_norm:
 distance:
   _target_: src.callbacks.DistanceToReference
   save_dir: ${datamodule.save_dir}
-  fname: gabor_${datamodule.patch_width}x${datamodule.patch_height}_m=${datamodule.m}_L=${datamodule.L}_inc=${datamodule.inc_bound}.pt
+  fname: gabor_${datamodule.patch_width}x${datamodule.patch_height}_m=${datamodule.m}_L=${datamodule.L}_inc=${datamodule.inc_bound}_seed=${seed}
   param_key: W
   reco_thresh: 0.7
   

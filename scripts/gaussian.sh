@@ -3,8 +3,7 @@ python run.py -m \
 seed=1 \
 callbacks=gaussian \
 datamodule=gaussian \
-logger.project=gabor_synth \
-logger.tags='[gaussian]' \
+logger.project=gaussian_dict \
 datamodule.m=210 \
 datamodule.k=10 \
 model.width=210 \

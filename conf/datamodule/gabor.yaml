@@ -11,3 +11,4 @@ k: 10
 noise: 0.0
 L: 8
 inc_bound: 12.0
+seed: ${seed}

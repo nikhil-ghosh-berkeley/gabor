@@ -1,8 +1,6 @@
 #!/bin/bash
 python run.py \
 seed=1 \
-model=perturbed \
-callbacks=perturbed \
 datamodule.batch_size=32 \
 model.optimizer.name=SGD \
 model.optimizer.lr=2 \
